@@ -1,0 +1,28 @@
+PODS:
+  - Flutter (1.0.0)
+  - sensors (0.0.1):
+    - Flutter
+  - wifi (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `.symlinks/flutter/ios`)
+  - sensors (from `.symlinks/plugins/sensors/ios`)
+  - wifi (from `.symlinks/plugins/wifi/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: ".symlinks/flutter/ios"
+  sensors:
+    :path: ".symlinks/plugins/sensors/ios"
+  wifi:
+    :path: ".symlinks/plugins/wifi/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 9d0fac939486c9aba2809b7982dfdbb47a7b0296
+  sensors: 5e1d451d2b563766999e768342efed82d6141fcc
+  wifi: 4b834e9f03bcf64097945ac3e5f8539a92727dc0
+
+PODFILE CHECKSUM: aff02bfeed411c636180d6812254b2daeea14d09
+
+COCOAPODS: 1.5.3
