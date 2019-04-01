@@ -1,38 +1,42 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wifi/wifi.dart';
 import 'package:sensors/sensors.dart';
+import 'res.dart';
+
+final updater = StreamController<Null>.broadcast();
 
 void main() {
   runApp(App());
   Wifi.ip.then((ip) => print(ip));
-  // accelerometerEvents.listen((AccelerometerEvent event) => print(event));
+  accelerometerEvents.listen((AccelerometerEvent event) {
+    data[1].zombie = true;
+    data[1].live = true;
+    data[1].x = (data[1].x - event.x / 200).clamp(0.0, 1.0);
+    data[1].y = (data[1].y + event.y / 200).clamp(0.0, 1.0);
+    updater.add(null);
+  });
 }
 
-var bigText = TextStyle(
-  color: Colors.white,
-  fontSize: 24,
-  fontWeight: FontWeight.w500,
-  decoration: TextDecoration.none,
-);
+class DotPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    data.forEach((id, d) {
+      if (!d.live) return;
+      var p = Paint()..color = d.color;
+      var o = Offset(size.width * d.x, size.height * d.y);
+      canvas.drawCircle(o, 16, p);
+      p.color = Colors.black;
+      if (d.zombie) canvas.drawCircle(o, 8, p);
+    });
+  }
 
-var smallText = bigText.copyWith(fontSize: 16);
-
-class Data {
-  Color color;
-  int score;
-  Data(this.color, this.score);
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
 
 class App extends StatelessWidget {
-  final Map<int, Data> data = {
-    1: Data(Colors.blue, 10),
-    2: Data(Colors.red, 4),
-    3: Data(Colors.purple, 2),
-    4: Data(Colors.yellow, 8),
-    5: Data(Colors.teal, 11),
-  };
-
   scoreItem(Data data) {
     return Row(
       children: <Widget>[
@@ -69,9 +73,14 @@ class App extends StatelessWidget {
               child: Text("Tag!", style: bigText),
             ),
             Expanded(
-              child: CustomPaint(
-                child: Container(color: Colors.white12),
-              ),
+              child: StreamBuilder<Object>(
+                  stream: updater.stream,
+                  builder: (context, snapshot) {
+                    return CustomPaint(
+                      painter: DotPainter(),
+                      child: Container(color: Colors.white12),
+                    );
+                  }),
             ),
             Padding(
               padding: EdgeInsets.all(16),
