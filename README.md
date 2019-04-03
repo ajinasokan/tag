@@ -1,16 +1,25 @@
-# tag
+# init
 
-A new Flutter project.
+make udp server
+init sensors
+show create game, join game, description
 
-## Getting Started
+# create game
 
-This project is a starting point for a Flutter application.
+-   get wifi ip
+-   if not wifi hotspot show err
+-   set mode as server
+-   show game screen, with joined players count, default scores
+-   show restart button
 
-A few resources to get you started if this is your first Flutter project:
+# join game
 
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
+-   get wifi ip
+-   get server ip
+-   connect with server
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+# comms
+
+-   join request = 0
+-   join response = 1, 2 (index of player in array 1 - 5, 6 means full)
+-   position update = 2, x, y (0 to 1 double values)

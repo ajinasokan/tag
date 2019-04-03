@@ -1,28 +1,18 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:wifi/wifi.dart';
-import 'package:sensors/sensors.dart';
-import 'res.dart';
-
-final updater = StreamController<Null>.broadcast();
+import 'resources.dart';
+import 'logic.dart';
 
 void main() {
   runApp(App());
-  Wifi.ip.then((ip) => print(ip));
-  accelerometerEvents.listen((AccelerometerEvent event) {
-    data[1].zombie = true;
-    data[1].live = true;
-    data[1].x = (data[1].x - event.x / 200).clamp(0.0, 1.0);
-    data[1].y = (data[1].y + event.y / 200).clamp(0.0, 1.0);
-    updater.add(null);
-  });
+  initSensors();
+  initServer();
 }
 
 class DotPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    data.forEach((id, d) {
+    players.forEach((id, d) {
       if (!d.live) return;
       var p = Paint()..color = d.color;
       var o = Offset(size.width * d.x, size.height * d.y);
@@ -37,7 +27,7 @@ class DotPainter extends CustomPainter {
 }
 
 class App extends StatelessWidget {
-  scoreItem(Data data) {
+  scoreItem(Player data) {
     return Row(
       children: <Widget>[
         Container(
@@ -56,7 +46,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var scores = <Widget>[Text("Score", style: smallText)];
-    data.values.forEach((d) => scores.add(scoreItem(d)));
+    players.values.forEach((d) => scores.add(scoreItem(d)));
 
     SystemChrome.setEnabledSystemUIOverlays([]);
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
