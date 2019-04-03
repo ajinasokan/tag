@@ -23,3 +23,11 @@ show create game, join game, description
 -   join request = 0
 -   join response = 1, 2 (index of player in array 1 - 5, 6 means full)
 -   position update = 2, x, y (0 to 1 double values)
+
+```
+server                      client
+                    <-      0
+1, 5                ->
+                    <-      2, 5, 0.545, 0.232
+2, 3, 0.234, 0.576  ->
+```
