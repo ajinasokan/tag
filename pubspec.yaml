@@ -24,6 +24,7 @@ dependencies:
     # Use with the CupertinoIcons class for iOS style icons.
     cupertino_icons: ^0.1.2
     wifi: 0.1.5
+    wifi_ip: 0.0.1
     sensors: 0.4.0+1
 
 dev_dependencies:

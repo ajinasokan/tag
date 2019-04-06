@@ -31,3 +31,6 @@ server                      client
                     <-      2, 5, 0.545, 0.232
 2, 3, 0.234, 0.576  ->
 ```
+
+position change => everyone
+zombie change => everyone

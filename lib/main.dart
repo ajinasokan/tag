@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'resources.dart';
 import 'logic.dart';
@@ -12,13 +13,13 @@ void main() {
 class DotPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    players.forEach((id, d) {
-      if (!d.live) return;
-      var p = Paint()..color = d.color;
-      var o = Offset(size.width * d.x, size.height * d.y);
+    players.forEach((d) {
+      if (d.score <= 0) return;
+      var p = Paint()..color = Colors.white;
+      var o = Offset(size.width * d.x / xMax, size.height * d.y / yMax);
       canvas.drawCircle(o, 16, p);
       p.color = Colors.black;
-      if (d.zombie) canvas.drawCircle(o, 8, p);
+      if (d.tag == 1) canvas.drawCircle(o, 8, p);
     });
   }
 
@@ -26,61 +27,85 @@ class DotPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
 
-class App extends StatelessWidget {
-  scoreItem(Player data) {
-    return Row(
-      children: <Widget>[
-        Container(
-          height: 16,
-          width: 16,
-          decoration: BoxDecoration(
-            color: data.color,
-            shape: BoxShape.circle,
-          ),
+scoreItem(Player data) {
+  return Row(
+    children: <Widget>[
+      Container(
+        height: 16,
+        width: 16,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
         ),
-        Text(" " + data.score.toString(), style: smallText)
-      ],
-    );
-  }
+      ),
+      Text(" " + data.score.toString(), style: smallText)
+    ],
+  );
+}
 
+button(String title, VoidCallback onTap) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+      child: Text(title, style: smallText),
+    ),
+  );
+}
+
+startMenu() {
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        message != null ? Text(message, style: smallText) : Container(),
+        button("Host game", create),
+        button("Join game", join),
+      ],
+    ),
+  );
+}
+
+class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var scores = <Widget>[Text("Score", style: smallText)];
-    players.values.forEach((d) => scores.add(scoreItem(d)));
-
     SystemChrome.setEnabledSystemUIOverlays([]);
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
       home: Container(
         color: Color(0xff1E2127),
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.all(16),
-              child: Text("Tag!", style: bigText),
-            ),
-            Expanded(
-              child: StreamBuilder<Object>(
-                  stream: updater.stream,
-                  builder: (context, snapshot) {
-                    return CustomPaint(
+        child: StreamBuilder(
+            stream: updater.stream,
+            builder: (c, s) {
+              return Column(
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text("Tag!", style: bigText),
+                  ),
+                  Expanded(
+                    child: CustomPaint(
                       painter: DotPainter(),
-                      child: Container(color: Colors.white12),
-                    );
-                  }),
-            ),
-            Padding(
-              padding: EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: scores,
-              ),
-            ),
-          ],
-        ),
+                      child: Container(
+                        color: Colors.white12,
+                        child: myID == null ? startMenu() : Container(),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [Text("Score", style: smallText)]
+                        ..addAll(players.map((p) => scoreItem(p))),
+                    ),
+                  ),
+                ],
+              );
+            }),
       ),
     );
   }
