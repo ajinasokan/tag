@@ -25,6 +25,10 @@ Player lastTag;
 String message;
 List<Player> players = [];
 
+player(int id) {
+  for (var i = players.length; i <= id; i++) players.add(Player());
+  return players[id];
+}
 // I/O
 
 String server;
@@ -39,28 +43,28 @@ initServer() async {
 onData(_) {
   var dg = udp.receive(), bin = dg.data, ip = dg.address;
 
-  // print("${ip.address} $bin");
-  if (bin[0] == 0) {
+  print("${ip.address} $bin");
+  if (bin[0] == 0 && myID != null) {
     // join request: 0
     var id = players.indexWhere((p) => p.ip == ip);
-    if (id == -1) {
-      players.add(Player()..ip = ip);
-      id = players.length;
-    }
+    if (id == -1) id = players.length;
     udp.send([1, id], ip, 54321);
+    if (id < 6) player(id).ip = ip;
     updater.add(null);
   } else if (bin[0] == 1) {
     // join response: 1, id
     myID = bin[1];
-    udp.send([2, myID, 0, 0], ip, 54321);
+    udp.send([2, myID, 127, 127], ip, 54321);
     updater.add(null);
   } else if (bin[0] == 2) {
     // delta: 2, id, dx, dy
     process(bin[1], bin[2] - 127, bin[3] - 127);
   } else if (bin[0] == 3) {
-    // position: 3, id, x, y, tag, score
-    for (var i = 1, id = (i - 1) ~/ 4; i < bin.length; i += 4)
-      players[id].data = bin.sublist(1);
+    // position: 3, x, y, tag, score
+    for (var i = 1, id = (i - 1) ~/ 4; i < bin.length; i += 4) {
+      // print(bin.sublist(i));
+      player(id).data = bin.sublist(i);
+    }
 
     update();
   }
@@ -105,11 +109,11 @@ create() async {
     return;
   }
   myID = 0;
-  players.add(Player()..tag = 1);
+  player(0).tag = 1;
   update();
 }
 
-get serverIP async => InternetAddress("192.168.43.20");
+get serverIP async => InternetAddress("192.168.43.171");
 
 join() async {
   udp.send([0], await serverIP, 54321);
@@ -121,18 +125,18 @@ distance(Player a, Player b) {
 
 process(int id, int dx, int dy) {
   // print("process $id, $dx, $dy");
-  if (players[id].score == 0) return;
+  if (player(id).score == 0) return;
 
-  players[id].x = (players[id].x - dx).clamp(0, xMax);
-  players[id].y = (players[id].y + dy).clamp(0, yMax);
+  player(id).x = (player(id).x - dx).clamp(0, xMax);
+  player(id).y = (player(id).y + dy).clamp(0, yMax);
 
   var tag = players.firstWhere((p) => p.tag == 1);
 
   for (var i = 0; i < players.length; i++) {
-    var p = players[i];
+    var p = player(i);
     if (p != lastTag && p != tag && p.score > 0 && distance(tag, p) < 15) {
       p.score--;
-      lastTag = tag;
+      // lastTag = tag;
 
       if (p.score != 0) {
         tag.tag = 0;

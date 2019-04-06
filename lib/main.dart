@@ -6,11 +6,12 @@ import 'logic.dart';
 
 void main() {
   runApp(App());
+  reset();
   initSensors();
   initServer();
 }
 
-class DotPainter extends CustomPainter {
+class Dots extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     players.forEach((d) {
@@ -24,11 +25,12 @@ class DotPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
+  bool shouldRepaint(_) => true;
 }
 
 scoreItem(Player data) {
   return Row(
+    mainAxisSize: MainAxisSize.min,
     children: <Widget>[
       Container(
         height: 16,
@@ -44,12 +46,9 @@ scoreItem(Player data) {
 }
 
 button(String title, VoidCallback onTap) {
-  return GestureDetector(
-    onTap: onTap,
-    child: Container(
-      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-      child: Text(title, style: smallText),
-    ),
+  return FlatButton(
+    onPressed: onTap,
+    child: Text(title, style: smallText),
   );
 }
 
@@ -67,45 +66,36 @@ startMenu() {
   );
 }
 
+home() {
+  return Scaffold(
+    appBar: AppBar(title: Text("Tag!"), elevation: 0, centerTitle: true),
+    bottomNavigationBar: Container(
+      color: Colors.black,
+      padding: EdgeInsets.all(16),
+      child: Wrap(
+        direction: Axis.horizontal,
+        spacing: 32,
+        runSpacing: 8,
+        children: [Text("Score")]..addAll(players.map((p) => scoreItem(p))),
+      ),
+    ),
+    body: CustomPaint(
+      painter: Dots(),
+      child: myID == null ? startMenu() : Container(),
+    ),
+  );
+}
+
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIOverlays([]);
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
     return MaterialApp(
       theme: ThemeData.dark(),
-      home: Container(
-        color: Color(0xff1E2127),
-        child: StreamBuilder(
-            stream: updater.stream,
-            builder: (c, s) {
-              return Column(
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text("Tag!", style: bigText),
-                  ),
-                  Expanded(
-                    child: CustomPaint(
-                      painter: DotPainter(),
-                      child: Container(
-                        color: Colors.white12,
-                        child: myID == null ? startMenu() : Container(),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [Text("Score", style: smallText)]
-                        ..addAll(players.map((p) => scoreItem(p))),
-                    ),
-                  ),
-                ],
-              );
-            }),
+      home: StreamBuilder(
+        stream: updater.stream,
+        builder: (c, s) => home(),
       ),
     );
   }
