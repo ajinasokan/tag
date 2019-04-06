@@ -70,20 +70,21 @@ onData(_) {
   }
 }
 
-int lastEvent = 0;
+// int lastEvent = 0;
 initSensors() async {
-  accelerometerEvents.listen((e) {
-    var now = DateTime.now().millisecondsSinceEpoch;
-    if (myID == null || now - lastEvent < 200) return;
+  accelerometerEvents.listen((e) async {
+    // var now = DateTime.now().millisecondsSinceEpoch;
+    if (myID == null) return;
+    // if (myID == null || now - lastEvent < 200) return;
 
     var x = e.x.toInt(), y = e.y.toInt();
     if (x == 0 && y == 0) return;
-    lastEvent = now;
-    var send = () async {
-      udp.send([2, myID, x + 127, y + 127], await serverIP, 54321);
-    };
-    send();
-    Future.delayed(Duration(milliseconds: 100), () => send());
+    // lastEvent = now;
+    // var send = () async {
+    udp.send([2, myID, x + 127, y + 127], await serverIP, 54321);
+    // };
+    // send();
+    // Future.delayed(Duration(milliseconds: 100), () => send());
   });
 }
 
@@ -113,7 +114,7 @@ create() async {
   update();
 }
 
-get serverIP async => InternetAddress("192.168.43.171");
+get serverIP async => InternetAddress("192.168.43.209");
 
 join() async {
   udp.send([0], await serverIP, 54321);

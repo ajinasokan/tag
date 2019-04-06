@@ -5,10 +5,12 @@ import 'resources.dart';
 import 'logic.dart';
 
 void main() {
-  runApp(App());
+  SystemChrome.setEnabledSystemUIOverlays([]);
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   reset();
   initSensors();
   initServer();
+  runApp(app());
 }
 
 class Dots extends CustomPainter {
@@ -86,17 +88,12 @@ home() {
   );
 }
 
-class App extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIOverlays([]);
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    return MaterialApp(
-      theme: ThemeData.dark(),
-      home: StreamBuilder(
-        stream: updater.stream,
-        builder: (c, s) => home(),
-      ),
-    );
-  }
+app() {
+  return MaterialApp(
+    theme: ThemeData.dark(),
+    home: StreamBuilder(
+      stream: updater.stream,
+      builder: (c, s) => home(),
+    ),
+  );
 }
