@@ -1,78 +1,79 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'resources.dart';
-import 'logic.dart';
+import 'game.dart';
 
-void main() {
+main() {
   SystemChrome.setEnabledSystemUIOverlays([]);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  reset();
-  initSensors();
-  initServer();
-  runApp(app());
+  init();
+  runApp(StreamBuilder(stream: updater.stream, builder: (c, s) => app()));
 }
 
-scoreItem(Player data) {
-  return Row(
-    children: <Widget>[
-      Icon(Icons.lens, size: 16),
-      Text(" " + data.score.toString(), style: smallText)
-    ],
-  );
-}
-
-playerItem(Player d, BoxConstraints con) {
-  return Positioned(
-    left: con.maxWidth * d.x / xMax - 16,
-    top: con.maxHeight * d.y / yMax - 16,
-    child: Icon(Icons.lens, size: 32),
-  );
-}
-
-button(String title, VoidCallback onTap) {
-  return FlatButton(onPressed: onTap, child: Text(title, style: smallText));
-}
-
-startMenu() {
-  if (myID != null) return Container();
-  return Center(
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        message != null ? Text(message, style: smallText) : Container(),
-        button("Host game", create),
-        button("Join game", join),
-      ],
-    ),
+app() {
+  return MaterialApp(
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData.dark(),
+    home: home(),
   );
 }
 
 home() {
   return Scaffold(
-    appBar: AppBar(title: Text("Tag!"), elevation: 0, centerTitle: true),
+    appBar: AppBar(
+      title: Text(title),
+      centerTitle: true,
+      backgroundColor: me == null ? null : colors[me],
+      actions: [IconButton(icon: Icon(Icons.refresh), onPressed: reset)],
+    ),
     bottomNavigationBar: Container(
-      color: Colors.black,
-      padding: EdgeInsets.all(16),
+      color: colors[5],
+      height: 56,
       child: Row(
-        children: [Text("Score   ")]..addAll(players.map((p) => scoreItem(p))),
+        children: [Text(txt[0])]..addAll(players.map((p) => score(p))),
       ),
     ),
-    body: LayoutBuilder(builder: (_, con) {
-      return Stack(
-        children: [Positioned.fill(child: startMenu())]
-          ..addAll(players.map((p) => playerItem(p, con))),
-      );
-    }),
+    body: LayoutBuilder(
+      builder: (_, con) => Stack(
+            children: [menu()]..addAll(players.map((p) => playerItem(p, con))),
+          ),
+    ),
   );
 }
 
-app() {
-  return MaterialApp(
-    theme: ThemeData.dark(),
-    home: StreamBuilder(
-      stream: updater.stream,
-      builder: (c, s) => home(),
+menu() {
+  if (me != null) return Container();
+  return Positioned.fill(
+    child: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(message),
+          row([button(txt[1], create), Text("  "), button(txt[2], join)])
+        ],
+      ),
     ),
   );
 }
+
+circle(size, color, tag) => Icon(tag ? Icons.radio_button_checked : Icons.lens,
+    size: size / 1, color: color);
+
+playerItem(Player p, BoxConstraints con) {
+  return Positioned(
+    left: con.maxWidth * p.x / 143 - 16,
+    top: con.maxHeight * p.y / 255 - 16,
+    child: circle(p.score == 0 ? 0 : 32, colors[p.id], p.isTag),
+  );
+}
+
+score(Player p) =>
+    row([circle(16, colors[p.id], p.isTag), Text(" ${p.score}      ")]);
+
+button(String title, VoidCallback onTap) {
+  return FlatButton(onPressed: onTap, color: colors[0], child: Text(title));
+}
+
+row(List<Widget> children) => Row(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: children);
