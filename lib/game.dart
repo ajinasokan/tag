@@ -7,10 +7,7 @@ import 'package:sensors/sensors.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
-var colors;
-var str;
-
-var updater = StreamController<int>.broadcast();
+var colors, str, updater = StreamController<int>.broadcast(), server;
 get update => updater.add(0);
 
 get now => DateTime.now().millisecondsSinceEpoch;
@@ -26,16 +23,10 @@ class Dot {
   InternetAddress ip = InternetAddress.loopbackIPv4;
 }
 
-int port = 54321;
-int xMax = 143;
-int yMax = 255;
+int port = 54321, xMax = 143, yMax = 255;
 int me;
-int winner = 6;
-int lastTag = 0;
-int lastTagTime = 0;
-int tag = 0;
-String title = str[5];
-String message = str[3];
+int winner = 6, lastTag = 0, tag = 0, lastTagTime = 0;
+String title = str[5], message = str[3];
 List<Dot> dots = [];
 
 Dot dot(int id) {
@@ -98,8 +89,6 @@ reset() async {
   dots = [];
   update;
 }
-
-var server;
 
 start() async {
   var myIP = (await WifiAccess.dhcp).ip;
